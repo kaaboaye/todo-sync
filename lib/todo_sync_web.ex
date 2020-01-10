@@ -22,7 +22,6 @@ defmodule TodoSyncWeb do
       use Phoenix.Controller, namespace: TodoSyncWeb
 
       import Plug.Conn
-      import TodoSyncWeb.Gettext
       alias TodoSyncWeb.Router.Helpers, as: Routes
     end
   end
@@ -36,8 +35,6 @@ defmodule TodoSyncWeb do
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
-      import TodoSyncWeb.ErrorHelpers
-      import TodoSyncWeb.Gettext
       alias TodoSyncWeb.Router.Helpers, as: Routes
     end
   end
@@ -53,7 +50,6 @@ defmodule TodoSyncWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import TodoSyncWeb.Gettext
     end
   end
 
