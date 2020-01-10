@@ -7,5 +7,7 @@ defmodule TodoSyncWeb.Router do
 
   scope "/api", TodoSyncWeb do
     pipe_through :api
+
+    resources "/tasks", TaskController
   end
 end

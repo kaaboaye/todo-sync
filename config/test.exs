@@ -3,8 +3,8 @@ use Mix.Config
 # Configure your database
 config :todo_sync, TodoSync.Repo,
   username: "postgres",
-  password: "postgres",
-  database: "todo_sync_test",
+  password: "mysecretpassword",
+  database: "postgres",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
