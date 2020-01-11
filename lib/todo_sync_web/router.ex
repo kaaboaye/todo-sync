@@ -12,6 +12,7 @@ defmodule TodoSyncWeb.Router do
 
     scope "/tasks" do
       get "/search", TaskController, :search
+      patch "/:id", TaskController, :update
     end
   end
 end

@@ -10,6 +10,15 @@ defmodule TodoSync.Tasks do
 
   alias TodoSync.Tasks.TodoTask
 
+  @doc """
+  Searches and returns list of tasks.
+
+  As `params` it accepts `Enumerable` of key-value pairs.
+  Allowed keys:
+    - `"name"` - Performs ILIKE search for tasks having given name
+    - `"source"` - Filters out different sources then provided.
+      Allowed sources: `"todoist"`, `"remember_the_milk"`.
+  """
   @spec search_tasks(%{binary => term}) :: [%TodoTask{}]
   def search_tasks(params) do
     Enum.reduce(params, TodoTask, fn
@@ -20,11 +29,14 @@ defmodule TodoSync.Tasks do
     |> Repo.all()
   end
 
-  # explained when used
-  @max_postgres_insert_tasks Integer.floor_div(65535, 4)
+  @doc """
+  Synchronizes local tasks with sources.
+  """
   @spec sync ::
           {:ok, %{created: non_neg_integer, deleted: non_neg_integer, updated: non_neg_integer}}
           | {:error, any}
+  # explained when used
+  @max_postgres_insert_all_tasks Integer.floor_div(65535, 4)
   def sync do
     # This implementation is focused on bringing number of database requests to the minimum
     #   because it's usually the most costly part of processes like that.
@@ -57,9 +69,21 @@ defmodule TodoSync.Tasks do
         from task in TodoTask,
           where: task.source == "todoist" and task.remote_id not in ^todoist_remote_ids
 
+      # Changes required to sync data from multiple sources are commented out below
+
+      # remember_the_milk_tasks = RememberTheMilk.fetch_tasks()
+      # remember_the_milk_remote_ids = Enum.map(remember_the_milk_tasks, & &1.remote_id)
+
+      # delete_query =
+      #   from task in TodoTask,
+      #     or_where: task.source == "todoist" and task.remote_id not in ^todoist_remote_ids,
+      #     or_where: task.source == "remember_the_milk" and task.remote_id not in ^todoist_remote_ids
+
       {deleted_count, nil} = Repo.delete_all(delete_query)
 
       remote_tasks = todoist_tasks
+
+      # remote_tasks = todoist_tasks ++ remember_the_milk_tasks
 
       repo_tasks = Repo.all(TodoTask)
 
@@ -92,7 +116,7 @@ defmodule TodoSync.Tasks do
       # 65535 parameters in single INSERT query because it is a maximum number of
       # supported parameters in single query
       to_insert
-      |> Enum.chunk_every(@max_postgres_insert_tasks)
+      |> Enum.chunk_every(@max_postgres_insert_all_tasks)
       |> Enum.each(&Repo.insert_all(TodoTask, &1))
 
       updated_count =
@@ -149,6 +173,22 @@ defmodule TodoSync.Tasks do
   def get_task!(id), do: Repo.get!(TodoTask, id)
 
   @doc """
+  Gets a single task.
+
+  Return `nil` if the Task does not exist.
+
+  ## Examples
+
+      iex> get_task!(123)
+      %TodoTask{}
+
+      iex> get_task!(456)
+      nil
+
+  """
+  def get_task(id), do: Repo.get(TodoTask, id)
+
+  @doc """
   Creates a task.
 
   ## Examples
@@ -179,9 +219,17 @@ defmodule TodoSync.Tasks do
 
   """
   def update_task(%TodoTask{} = task, attrs) do
-    task
-    |> TodoTask.changeset(attrs)
-    |> Repo.update()
+    fn ->
+      task =
+        task
+        |> TodoTask.update_changeset(attrs)
+        |> Repo.update!()
+
+      :ok = provider_from_source(task.source).update_task(task)
+
+      task
+    end
+    |> Repo.transaction()
   end
 
   @doc """
@@ -212,4 +260,7 @@ defmodule TodoSync.Tasks do
   def change_task(%TodoTask{} = task) do
     TodoTask.changeset(task, %{})
   end
+
+  defp provider_from_source(:todoist), do: Todoist
+  defp provider_from_source(:remember_the_milk), do: throw("not implemented")
 end

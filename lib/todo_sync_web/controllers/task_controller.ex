@@ -17,10 +17,12 @@ defmodule TodoSyncWeb.TaskController do
     render(conn, "index.json", tasks: tasks)
   end
 
-  def update(conn, %{"id" => id, "task" => task_params}) do
-    task = Tasks.get_task!(id)
+  def update(conn, params) do
+    task_id = Map.fetch!(params, "id")
 
-    with {:ok, %TodoTask{} = task} <- Tasks.update_task(task, task_params) do
+    with %{} = task_params <- params["task"] || {:error, :bad_request},
+         %{} = task <- Tasks.get_task(task_id) || {:error, :not_found},
+         {:ok, task} <- Tasks.update_task(task, task_params) do
       render(conn, "show.json", task: task)
     end
   end

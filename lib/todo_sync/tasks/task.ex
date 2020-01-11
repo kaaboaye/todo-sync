@@ -20,4 +20,10 @@ defmodule TodoSync.Tasks.TodoTask do
     |> unique_constraint(:remote_id, name: "tasks_source_remote_id_index")
     |> validate_required([:name, :source, :remote_id])
   end
+
+  def update_changeset(task, attrs) do
+    task
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+  end
 end
