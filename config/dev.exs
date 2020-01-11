@@ -31,3 +31,5 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :todo_sync, TodoSync.Tasks.Todoist, api_token: System.fetch_env!("TODOIST_TOKEN")

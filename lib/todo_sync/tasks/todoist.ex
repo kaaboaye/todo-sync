@@ -5,12 +5,11 @@ defmodule TodoSync.Tasks.Todoist do
 
   @behaviour Provider
 
+  defp conf, do: Application.get_env(:todo_sync, __MODULE__, [])
+  defp api_token, do: Keyword.fetch!(conf(), :api_token)
+
   plug Tesla.Middleware.BaseUrl, "https://api.todoist.com"
-
-  plug Tesla.Middleware.Headers, [
-    {"authorization", "Bearer 03f799bf70d7ceabc88ea4075c154721cc12305b"}
-  ]
-
+  plug Tesla.Middleware.Headers, [{"authorization", "Bearer " <> api_token()}]
   plug Tesla.Middleware.JSON
 
   @impl Provider
