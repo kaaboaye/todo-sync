@@ -5,9 +5,13 @@ defmodule TodoSyncWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", TodoSyncWeb do
+  scope "/", TodoSyncWeb do
     pipe_through :api
 
-    resources "/tasks", TaskController
+    post "/sync", TaskController, :sync
+
+    scope "/tasks" do
+      get "/search", TaskController, :search
+    end
   end
 end

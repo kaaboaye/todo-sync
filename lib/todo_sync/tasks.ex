@@ -104,6 +104,15 @@ defmodule TodoSync.Tasks do
     TodoTask.changeset(task, %{})
   end
 
+  def search_tasks(params) do
+    Enum.reduce(params, TodoTask, fn
+      {"name", name}, query -> where(query, [task], ilike(task.name, ^"%#{name}%"))
+      {"source", source}, query -> where(query, [task], task.source == ^source)
+      _, query -> query
+    end)
+    |> Repo.all()
+  end
+
   # explained when used
   @max_postgres_insert_tasks Integer.floor_div(65535, 4)
   def sync do
@@ -190,7 +199,7 @@ defmodule TodoSync.Tasks do
 
       %{
         deleted: deleted_count,
-        inserted: length(to_insert),
+        created: length(to_insert),
         updated: updated_count
       }
     end
