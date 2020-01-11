@@ -104,6 +104,7 @@ defmodule TodoSync.Tasks do
     TodoTask.changeset(task, %{})
   end
 
+  @spec search_tasks(%{binary => term}) :: [%TodoTask{}]
   def search_tasks(params) do
     Enum.reduce(params, TodoTask, fn
       {"name", name}, query -> where(query, [task], ilike(task.name, ^"%#{name}%"))
@@ -115,6 +116,9 @@ defmodule TodoSync.Tasks do
 
   # explained when used
   @max_postgres_insert_tasks Integer.floor_div(65535, 4)
+  @spec sync ::
+          {:ok, %{created: non_neg_integer, deleted: non_neg_integer, updated: non_neg_integer}}
+          | {:error, any}
   def sync do
     # This implementation is focused on bringing number of database requests to the minimum
     #   because it's usually the most costly part of processes like that.
