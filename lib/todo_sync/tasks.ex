@@ -132,7 +132,7 @@ defmodule TodoSync.Tasks do
     # begin transaction
     fn ->
       todoist_tasks = Todoist.fetch_tasks()
-      todoist_remote_ids = Enum.map(todoist_tasks, &Map.fetch!(&1, :remote_id))
+      todoist_remote_ids = Enum.map(todoist_tasks, & &1.remote_id)
 
       delete_query =
         from task in TodoTask,
