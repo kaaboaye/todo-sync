@@ -1,5 +1,8 @@
-defmodule TodoSync.Tasks.Task do
+defmodule TodoSync.Tasks.TodoTask do
+  @type t :: %__MODULE__{}
+
   use Ecto.Schema
+
   import Ecto.Changeset
 
   alias TodoSync.Tasks.TaskSource
