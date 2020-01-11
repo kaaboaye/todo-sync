@@ -10,100 +10,6 @@ defmodule TodoSync.Tasks do
 
   alias TodoSync.Tasks.TodoTask
 
-  @doc """
-  Returns the list of tasks.
-
-  ## Examples
-
-      iex> list_tasks()
-      [%TodoTask{}, ...]
-
-  """
-  def list_tasks do
-    Repo.all(TodoTask)
-  end
-
-  @doc """
-  Gets a single task.
-
-  Raises `Ecto.NoResultsError` if the Task does not exist.
-
-  ## Examples
-
-      iex> get_task!(123)
-      %TodoTask{}
-
-      iex> get_task!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_task!(id), do: Repo.get!(TodoTask, id)
-
-  @doc """
-  Creates a task.
-
-  ## Examples
-
-      iex> create_task(%{field: value})
-      {:ok, %TodoTask{}}
-
-      iex> create_task(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_task(attrs \\ %{}) do
-    %TodoTask{}
-    |> TodoTask.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a task.
-
-  ## Examples
-
-      iex> update_task(task, %{field: new_value})
-      {:ok, %TodoTask{}}
-
-      iex> update_task(task, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_task(%TodoTask{} = task, attrs) do
-    task
-    |> TodoTask.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Task.
-
-  ## Examples
-
-      iex> delete_task(task)
-      {:ok, %TodoTask{}}
-
-      iex> delete_task(task)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_task(%TodoTask{} = task) do
-    Repo.delete(task)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking task changes.
-
-  ## Examples
-
-      iex> change_task(task)
-      %Ecto.Changeset{source: %TodoTask{}}
-
-  """
-  def change_task(%TodoTask{} = task) do
-    TodoTask.changeset(task, %{})
-  end
-
   @spec search_tasks(%{binary => term}) :: [%TodoTask{}]
   def search_tasks(params) do
     Enum.reduce(params, TodoTask, fn
@@ -211,5 +117,99 @@ defmodule TodoSync.Tasks do
       # 10 minutes timeout
       timeout: 600
     )
+  end
+
+  @doc """
+  Returns the list of tasks.
+
+  ## Examples
+
+      iex> list_tasks()
+      [%TodoTask{}, ...]
+
+  """
+  def list_tasks do
+    Repo.all(TodoTask)
+  end
+
+  @doc """
+  Gets a single task.
+
+  Raises `Ecto.NoResultsError` if the Task does not exist.
+
+  ## Examples
+
+      iex> get_task!(123)
+      %TodoTask{}
+
+      iex> get_task!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_task!(id), do: Repo.get!(TodoTask, id)
+
+  @doc """
+  Creates a task.
+
+  ## Examples
+
+      iex> create_task(%{field: value})
+      {:ok, %TodoTask{}}
+
+      iex> create_task(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_task(attrs \\ %{}) do
+    %TodoTask{}
+    |> TodoTask.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a task.
+
+  ## Examples
+
+      iex> update_task(task, %{field: new_value})
+      {:ok, %TodoTask{}}
+
+      iex> update_task(task, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_task(%TodoTask{} = task, attrs) do
+    task
+    |> TodoTask.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Task.
+
+  ## Examples
+
+      iex> delete_task(task)
+      {:ok, %TodoTask{}}
+
+      iex> delete_task(task)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_task(%TodoTask{} = task) do
+    Repo.delete(task)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking task changes.
+
+  ## Examples
+
+      iex> change_task(task)
+      %Ecto.Changeset{source: %TodoTask{}}
+
+  """
+  def change_task(%TodoTask{} = task) do
+    TodoTask.changeset(task, %{})
   end
 end
