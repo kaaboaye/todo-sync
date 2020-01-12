@@ -11,6 +11,14 @@ defmodule TodoSync.Tasks.Todoist do
   plug Tesla.Middleware.BaseUrl, "https://api.todoist.com"
   plug Tesla.Middleware.Headers, [{"authorization", "Bearer " <> api_token()}]
   plug Tesla.Middleware.JSON
+  plug Tesla.Middleware.Logger
+
+  plug Tesla.Middleware.Retry,
+    should_retry: fn
+      {:ok, %{status: 500}} -> true
+      {:ok, _} -> false
+      {:error, _} -> true
+    end
 
   @impl Provider
   def fetch_tasks do

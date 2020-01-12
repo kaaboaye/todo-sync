@@ -2,7 +2,6 @@ defmodule TodoSyncWeb.TaskController do
   use TodoSyncWeb, :controller
 
   alias TodoSync.Tasks
-  alias TodoSync.Tasks.TodoTask
 
   action_fallback TodoSyncWeb.FallbackController
 

@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :todo_sync, TodoSync.Repo,
