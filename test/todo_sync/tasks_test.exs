@@ -13,9 +13,7 @@ defmodule TodoSync.TasksTest do
     }
 
     @update_attrs %{
-      name: "some updated name",
-      remote_id: "some updated remote_id",
-      source: "remember_the_milk"
+      name: "some updated name"
     }
 
     @invalid_attrs %{
@@ -58,8 +56,6 @@ defmodule TodoSync.TasksTest do
       task = task_fixture()
       assert {:ok, %TodoTask{} = task} = Tasks.update_task(task, @update_attrs)
       assert task.name == "some updated name"
-      assert task.remote_id == "some updated remote_id"
-      assert task.source == :remember_the_milk
     end
 
     test "update_task/2 with invalid data returns error changeset" do
