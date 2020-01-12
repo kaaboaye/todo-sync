@@ -6,9 +6,16 @@ defmodule TodoSync.Tasks do
   import Ecto.Query, warn: false
 
   alias TodoSync.Repo
-  alias TodoSync.Tasks.Todoist
 
+  alias TodoSync.Tasks.Todoist
   alias TodoSync.Tasks.TodoTask
+  alias TodoSync.Tasks.Mock
+
+  defp conf, do: Application.get_env(:todo_sync, __MODULE__, [])
+  defp mock_remote, do: Keyword.get(conf(), :mock_remote, false)
+
+  defp todoist_provider, do: unless(mock_remote(), do: Todoist, else: Mock)
+  # defp remember_the_milk_provider, do: unless(mock_remote(), do: RememberTheMilk, else: Mock)
 
   @doc """
   Searches and returns list of tasks.
@@ -62,7 +69,7 @@ defmodule TodoSync.Tasks do
 
     # begin transaction
     fn ->
-      todoist_tasks = Todoist.fetch_tasks()
+      todoist_tasks = todoist_provider().fetch_tasks()
       todoist_remote_ids = Enum.map(todoist_tasks, & &1.remote_id)
 
       delete_query =
@@ -220,14 +227,18 @@ defmodule TodoSync.Tasks do
   """
   def update_task(%TodoTask{} = task, attrs) do
     fn ->
-      task =
+      task_update_result =
         task
         |> TodoTask.update_changeset(attrs)
-        |> Repo.update!()
+        |> Repo.update()
 
-      :ok = provider_from_source(task.source).update_task(task)
+      with {:ok, task} <- task_update_result do
+        :ok = provider_from_source(task.source).update_task(task)
 
-      task
+        task
+      else
+        {:error, err} -> Repo.rollback(err)
+      end
     end
     |> Repo.transaction()
   end
@@ -261,6 +272,6 @@ defmodule TodoSync.Tasks do
     TodoTask.changeset(task, %{})
   end
 
-  defp provider_from_source(:todoist), do: Todoist
+  defp provider_from_source(:todoist), do: todoist_provider()
   defp provider_from_source(:remember_the_milk), do: throw("not implemented")
 end

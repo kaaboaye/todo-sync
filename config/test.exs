@@ -4,7 +4,7 @@ use Mix.Config
 config :todo_sync, TodoSync.Repo,
   username: "postgres",
   password: "mysecretpassword",
-  database: "postgres",
+  database: "postgres_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
@@ -16,3 +16,5 @@ config :todo_sync, TodoSyncWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :todo_sync, TodoSync.Tasks, mock_remote: true
