@@ -11,7 +11,6 @@ defmodule TodoSync.Tasks.Todoist do
   plug Tesla.Middleware.BaseUrl, "https://api.todoist.com"
   plug Tesla.Middleware.Headers, [{"authorization", "Bearer " <> api_token()}]
   plug Tesla.Middleware.JSON
-  plug Tesla.Middleware.Logger
 
   plug Tesla.Middleware.Retry,
     should_retry: fn
@@ -20,23 +19,25 @@ defmodule TodoSync.Tasks.Todoist do
       {:error, _} -> true
     end
 
+  plug Tesla.Middleware.Logger
+
   @impl Provider
   def fetch_tasks do
     res = %{status: 200} = get!("/rest/v1/tasks")
-    Enum.map(res.body, &task_from_todoist/1)
+
+    Enum.map(
+      res.body,
+      &%{
+        name: Map.fetch!(task, "content"),
+        remote_id: Map.fetch!(task, "id") |> to_string(),
+        source: :todoist
+      }
+    )
   end
 
   @impl Provider
   def update_task(%{source: :todoist, remote_id: remote_id, name: name}) do
     %{status: 204} = post!("/rest/v1/tasks/#{remote_id}", %{"content" => name})
     :ok
-  end
-
-  defp task_from_todoist(task) do
-    %{
-      name: Map.fetch!(task, "content"),
-      remote_id: Map.fetch!(task, "id") |> to_string(),
-      source: :todoist
-    }
   end
 end

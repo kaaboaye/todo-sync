@@ -59,24 +59,25 @@ defmodule TodoSync.Tasks do
     # - Perform updates
 
     # Possible improvements:
-    # - Lock for update all tasks in local database
-    #     but it may freeze whole application for the time of the synchronization
+    # - Lock for update or other semaphore in order to eliminate race conditions
     # - Perform updates via batch upsets but in order to get a number of inserted and updated rows
     #     usage of such query https://stackoverflow.com/a/38858662/8651854 would be required
     #     and Ecto does not supports such queries.
     # - Use `Repo.stream` and`Stream` instead of `Repo.all` and `Enum` but until all of the data
     #     fits into the memory there is no need of doing that.
 
+    todoist_tasks = todoist_provider().fetch_tasks()
+    todoist_remote_ids = Enum.map(todoist_tasks, & &1.remote_id)
+
+    remote_tasks = todoist_tasks
+    # Changes required to sync data from multiple sources are commented out below
+    # remote_tasks = todoist_tasks ++ remember_the_milk_tasks
+
     # begin transaction
     fn ->
-      todoist_tasks = todoist_provider().fetch_tasks()
-      todoist_remote_ids = Enum.map(todoist_tasks, & &1.remote_id)
-
       delete_query =
         from task in TodoTask,
           where: task.source == "todoist" and task.remote_id not in ^todoist_remote_ids
-
-      # Changes required to sync data from multiple sources are commented out below
 
       # remember_the_milk_tasks = RememberTheMilk.fetch_tasks()
       # remember_the_milk_remote_ids = Enum.map(remember_the_milk_tasks, & &1.remote_id)
@@ -87,10 +88,6 @@ defmodule TodoSync.Tasks do
       #     or_where: task.source == "remember_the_milk" and task.remote_id not in ^todoist_remote_ids
 
       {deleted_count, nil} = Repo.delete_all(delete_query)
-
-      remote_tasks = todoist_tasks
-
-      # remote_tasks = todoist_tasks ++ remember_the_milk_tasks
 
       repo_tasks = Repo.all(TodoTask)
 
@@ -144,10 +141,7 @@ defmodule TodoSync.Tasks do
         updated: updated_count
       }
     end
-    |> Repo.transaction(
-      # 10 minutes timeout
-      timeout: 600
-    )
+    |> Repo.transaction()
   end
 
   @doc """
