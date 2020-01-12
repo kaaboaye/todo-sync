@@ -59,7 +59,7 @@ defmodule TodoSync.Tasks do
     # - Perform updates
 
     # Possible improvements:
-    # - Lock for update or other semaphore in order to eliminate race conditions
+    # - Use lock for update or other semaphore in order to eliminate race conditions
     # - Perform updates via batch upsets but in order to get a number of inserted and updated rows
     #     usage of such query https://stackoverflow.com/a/38858662/8651854 would be required
     #     and Ecto does not supports such queries.
