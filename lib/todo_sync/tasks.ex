@@ -91,7 +91,7 @@ defmodule TodoSync.Tasks do
 
       repo_tasks = Repo.all(TodoTask)
 
-      # the below code creates map which enables constant time, in memory lookups for [source, remote_id]
+      # the code below creates map which enables constant time, in memory lookups for [source, remote_id]
       # eg. map %{
       #    todoist: %{
       #       "123" => %TodoTask{…},
