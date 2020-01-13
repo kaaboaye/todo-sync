@@ -28,8 +28,8 @@ defmodule TodoSync.Tasks.Todoist do
     Enum.map(
       res.body,
       &%{
-        name: Map.fetch!(task, "content"),
-        remote_id: Map.fetch!(task, "id") |> to_string(),
+        name: Map.fetch!(&1, "content"),
+        remote_id: Map.fetch!(&1, "id") |> to_string(),
         source: :todoist
       }
     )
